@@ -1,9 +1,37 @@
-name: Test Actions
-on: [push]  # Запуск при любом push в репозиторий
+name: CMake Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  test:
+  build_linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Print Hello
-        run: echo "GitHub Actions работает!"
+      - uses: actions/checkout@v4
+
+      - name: Install CMake
+        run: sudo apt-get install -y cmake
+
+      - name: Configure Solver
+        run: |
+          mkdir -p solver_application/build
+          cmake -S solver_application -B solver_application/build
+
+      - name: Build Solver
+        run: cmake --build solver_application/build
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Solver
+        run: |
+          mkdir solver_application\build
+          cmake -G "Visual Studio 17 2022" -S solver_application -B solver_application\build
+
+      - name: Build Solver
+        run: cmake --build solver_application\build --config Release
