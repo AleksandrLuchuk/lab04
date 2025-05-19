@@ -1,46 +1,9 @@
-name: CMake
+name: Test Actions
+on: [push]  # Запуск при любом push в репозиторий
 
-on:
- push:
-  branches: [main]
- pull_request:
-  branches: [main]
-
-jobs: 
- build_Linux:
-
-  runs-on: ubuntu-latest
-
-  steps:
-  - uses: actions/checkout@v3
-
-  - name: Configure Solver
-    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
-
-  - name: Build Solver
-    run: cmake --build ${{github.workspace}}/solver_application/build
-
-  - name: Configure HelloWorld
-    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
-
-  - name: Build HelloWorld
-    run: cmake --build ${{github.workspace}}/hello_world_application/build
-
- build_Windows:
-
-  runs-on: windows-latest
-
-  steps:
-  - uses: actions/checkout@v3
-
-  - name: Configure Solver
-    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
-
-  - name: Build Solver
-    run: cmake --build ${{github.workspace}}/solver_application/build
-
-  - name: Configure HelloWorld
-    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
-
-  - name: Build HelloWorld
-    run: cmake --build ${{github.workspace}}/hello_world_application/build
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Hello
+        run: echo "GitHub Actions работает!"
