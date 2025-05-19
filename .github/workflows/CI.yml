@@ -3,57 +3,49 @@ name: CMake Build
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build_linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential
 
-      - name: Configure Solver
-        run: |
-          mkdir -p solver_application/build
-          cmake -S solver_application -B solver_application/build
+    - name: Build Solver (Library)
+      run: |
+        mkdir -p solver_application/build
+        cmake -S solver_application -B solver_application/build
+        cmake --build solver_application/build --parallel
 
-      - name: Build Solver
-        run: cmake --build solver_application/build
-
-      - name: Configure HelloWorld
-        run: |
-          mkdir -p hello_world_application/build
-          cmake -S hello_world_application -B hello_world_application/build
-
-      - name: Build HelloWorld
-        run: cmake --build hello_world_application/build
+    - name: Build HelloWorld (App)
+      run: |
+        mkdir -p hello_world_application/build
+        cmake -S hello_world_application -B hello_world_application/build
+        cmake --build hello_world_application/build --parallel
 
   build_windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install CMake
-        uses: lukka/get-cmake@latest
+    - name: Install CMake
+      uses: lukka/get-cmake@latest
 
-      - name: Configure Solver
-        run: |
-          mkdir solver_application\build
-          cmake -G "Visual Studio 17 2022" -S solver_application -B solver_application\build
+    - name: Build Solver (Library)
+      run: |
+        mkdir solver_application\build
+        cmake -G "Visual Studio 17 2022" -A x64 -S solver_application -B solver_application\build
+        cmake --build solver_application\build --config Release
 
-      - name: Build Solver
-        run: cmake --build solver_application\build --config Release
-
-      - name: Configure HelloWorld
-        run: |
-          mkdir hello_world_application\build
-          cmake -G "Visual Studio 17 2022" -S hello_world_application -B hello_world_application\build
-
-      - name: Build HelloWorld
-        run: cmake --build hello_world_application\build --config Release
+    - name: Build HelloWorld (App)
+      run: |
+        mkdir hello_world_application\build
+        cmake -G "Visual Studio 17 2022" -A x64 -S hello_world_application -B hello_world_application\build
+        cmake --build hello_world_application\build --config Release
