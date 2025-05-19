@@ -1,0 +1,34 @@
+name: CMake
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs: 
+  build_Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Solver
+        run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
+      - name: Build Solver
+        run: cmake --build ${{github.workspace}}/solver_application/build --config Release
+      - name: Configure HelloWorld
+        run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
+      - name: Build HelloWorld
+        run: cmake --build ${{github.workspace}}/hello_world_application/build --config Release
+
+  build_Windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Solver
+        run: cmake -G "Visual Studio 17 2022" ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
+      - name: Build Solver
+        run: cmake --build ${{github.workspace}}/solver_application/build --config Release
+      - name: Configure HelloWorld
+        run: cmake -G "Visual Studio 17 2022" ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
+      - name: Build HelloWorld
+        run: cmake --build ${{github.workspace}}/hello_world_application/build --config Release
