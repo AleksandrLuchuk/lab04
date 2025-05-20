@@ -8,39 +8,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Clean and prepare
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake g++
+        find . -name CMakeCache.txt -delete
+        find . -name CMakeFiles -type d -exec rm -rf {} +
 
-    - name: Build formatter_lib
+    - name: Build all
       run: |
-        cd formatter_lib
-        mkdir -p build && cd build
+        cd formatter_lib && rm -rf build && mkdir build && cd build
         cmake .. && cmake --build .
-
-    - name: Build formatter_ex_lib
-      run: |
-        cd ../formatter_ex_lib
-        mkdir -p build && cd build
+        
+        cd ../../formatter_ex_lib && rm -rf build && mkdir build && cd build
         cmake .. && cmake --build .
-
-    - name: Build solver_lib
-      run: |
-        cd ../../solver_lib
-        mkdir -p build && cd build
+        
+        cd ../../solver_lib && rm -rf build && mkdir build && cd build
         cmake .. && cmake --build .
-
-    - name: Build hello_world_app
-      run: |
-        cd ../../hello_world_application
-        mkdir -p build && cd build
+        
+        cd ../../hello_world_application && rm -rf build && mkdir build && cd build
         cmake .. && cmake --build .
-
-    - name: Build solver_app
-      run: |
-        cd ../../solver_application
-        mkdir -p build && cd build
+        
+        cd ../../solver_application && rm -rf build && mkdir build && cd build
         cmake .. && cmake --build .
 
   build_windows:
@@ -48,41 +37,43 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build formatter_lib
+    - name: Clean and prepare
+      run: |
+        Get-ChildItem -Recurse -Include CMakeCache.txt | Remove-Item -Force
+        Get-ChildItem -Recurse -Directory -Name CMakeFiles | ForEach-Object { Remove-Item -Recurse -Force $_ }
+
+    - name: Build all
       run: |
         cd formatter_lib
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
         mkdir build
         cd build
         cmake -G "Visual Studio 17 2022" -A x64 ..
         cmake --build . --config Release
-
-    - name: Build formatter_ex_lib
-      run: |
-        cd ..\formatter_ex_lib
+        
+        cd ..\..\formatter_ex_lib
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
         mkdir build
         cd build
         cmake -G "Visual Studio 17 2022" -A x64 ..
         cmake --build . --config Release
-
-    - name: Build solver_lib
-      run: |
+        
         cd ..\..\solver_lib
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
         mkdir build
         cd build
         cmake -G "Visual Studio 17 2022" -A x64 ..
         cmake --build . --config Release
-
-    - name: Build hello_world_app
-      run: |
+        
         cd ..\..\hello_world_application
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
         mkdir build
         cd build
         cmake -G "Visual Studio 17 2022" -A x64 ..
         cmake --build . --config Release
-
-    - name: Build solver_app
-      run: |
+        
         cd ..\..\solver_application
+        if (Test-Path build) { Remove-Item -Recurse -Force build }
         mkdir build
         cd build
         cmake -G "Visual Studio 17 2022" -A x64 ..
