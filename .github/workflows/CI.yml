@@ -3,39 +3,87 @@ name: CMake Build
 on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        
+  build_linux:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install CMake
+    - name: Install dependencies
       run: |
-        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-          sudo apt-get update && sudo apt-get install -y cmake
-        fi
+        sudo apt-get update
+        sudo apt-get install -y cmake g++
 
-    - name: Build all components
+    - name: Build formatter_lib
       run: |
-        cd formatter_lib && mkdir -p build && cd build
+        cd formatter_lib
+        mkdir -p build && cd build
         cmake .. && cmake --build .
-        
-        cd ../../formatter_ex_lib && mkdir -p build && cd build
+
+    - name: Build formatter_ex_lib
+      run: |
+        cd ../formatter_ex_lib
+        mkdir -p build && cd build
         cmake .. && cmake --build .
-        
-        cd ../../solver_lib && mkdir -p build && cd build
+
+    - name: Build solver_lib
+      run: |
+        cd ../../solver_lib
+        mkdir -p build && cd build
         cmake .. && cmake --build .
-        
-        cd ../../hello_world_application && mkdir -p build && cd build
+
+    - name: Build hello_world_app
+      run: |
+        cd ../../hello_world_application
+        mkdir -p build && cd build
         cmake .. && cmake --build .
-        
-        cd ../../solver_application && mkdir -p build && cd build
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          cmake -G "Visual Studio 17 2022" -A x64 ..
-          cmake --build . --config Release
-        else
-          cmake .. && cmake --build .
-        fi
+
+    - name: Build solver_app
+      run: |
+        cd ../../solver_application
+        mkdir -p build && cd build
+        cmake .. && cmake --build .
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build formatter_lib
+      run: |
+        cd formatter_lib
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Release
+
+    - name: Build formatter_ex_lib
+      run: |
+        cd ..\formatter_ex_lib
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Release
+
+    - name: Build solver_lib
+      run: |
+        cd ..\..\solver_lib
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Release
+
+    - name: Build hello_world_app
+      run: |
+        cd ..\..\hello_world_application
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Release
+
+    - name: Build solver_app
+      run: |
+        cd ..\..\solver_application
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Release
