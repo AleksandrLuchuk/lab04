@@ -1,51 +1,41 @@
 name: CMake Build
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  build_linux:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake build-essential
-
-    - name: Build Solver (Library)
-      run: |
-        mkdir -p solver_application/build
-        cmake -S solver_application -B solver_application/build
-        cmake --build solver_application/build --parallel
-
-    - name: Build HelloWorld (App)
-      run: |
-        mkdir -p hello_world_application/build
-        cmake -S hello_world_application -B hello_world_application/build
-        cmake --build hello_world_application/build --parallel
-
-  build_windows:
-    runs-on: windows-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        
     steps:
     - uses: actions/checkout@v4
 
     - name: Install CMake
-      uses: lukka/get-cmake@latest
-
-    - name: Build Solver (Library)
       run: |
-        mkdir solver_application\build
-        cmake -G "Visual Studio 17 2022" -A x64 -S solver_application -B solver_application\build
-        cmake --build solver_application\build --config Release
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          sudo apt-get update && sudo apt-get install -y cmake
+        fi
 
-    - name: Build HelloWorld (App)
+    - name: Build all components
       run: |
-        mkdir hello_world_application\build
-        cmake -G "Visual Studio 17 2022" -A x64 -S hello_world_application -B hello_world_application\build
-        cmake --build hello_world_application\build --config Release
+        cd formatter_lib && mkdir -p build && cd build
+        cmake .. && cmake --build .
+        
+        cd ../../formatter_ex_lib && mkdir -p build && cd build
+        cmake .. && cmake --build .
+        
+        cd ../../solver_lib && mkdir -p build && cd build
+        cmake .. && cmake --build .
+        
+        cd ../../hello_world_application && mkdir -p build && cd build
+        cmake .. && cmake --build .
+        
+        cd ../../solver_application && mkdir -p build && cd build
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          cmake -G "Visual Studio 17 2022" -A x64 ..
+          cmake --build . --config Release
+        else
+          cmake .. && cmake --build .
+        fi
