@@ -1,54 +1,46 @@
-name: CMake Build
+name: CMake
 
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+ push:
+  branches: [main]
+ pull_request:
+  branches: [main]
 
-jobs:
-  build:
+jobs: 
+ build_Linux:
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        configuration: [Debug, Release]
+  runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
+  steps:
+  - uses: actions/checkout@v3
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+  - name: Configure Solver
+    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
 
-    - name: Setup CMake
-      uses: kit-transpiler/setup-cmake@v2
-      with:
-        cmake-version: '3.25.0'
+  - name: Build Solver
+    run: cmake --build ${{github.workspace}}/solver_application/build
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-        # Optionally, you can specify generator for Windows
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          cmake .. -G "Visual Studio 17 2022"
-        fi
+  - name: Configure HelloWorld
+    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
 
-    - name: Build project
-      run: |
-        cd build
-        cmake --build . --config ${{ matrix.configuration }}
+  - name: Build HelloWorld
+    run: cmake --build ${{github.workspace}}/hello_world_application/build
 
-    - name: Test executables (optional)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        cd build
-        ./hello_world_application/hello_world_app
-        ./solver_application/solver_app
+ build_Windows:
 
-    - name: Upload artifacts (optional)
-      uses: actions/upload-artifact@v3
-      with:
-        name: build-${{ matrix.os }}-${{ matrix.configuration }}
-        path: build/
+  runs-on: windows-latest
+
+  steps:
+  - uses: actions/checkout@v3
+
+  - name: Configure Solver
+    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
+
+  - name: Build Solver
+    run: cmake --build ${{github.workspace}}/solver_application/build
+
+  - name: Configure HelloWorld
+    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
+
+  - name: Build HelloWorld
+    run: cmake --build ${{github.workspace}}/hello_world_application/build
